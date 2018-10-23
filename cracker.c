@@ -1,6 +1,18 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <mpi.h>
+
+unsigned long hash(unsigned char *str)
+{
+    unsigned long hash = 5381;
+    int c;
+
+    while (c = *str++)
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+    return hash;
+} // http://www.cse.yorku.ca/~oz/hash.html
+
 int main(int argc, char *argv[])
 {
 	int rank, size, len;
