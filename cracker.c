@@ -21,24 +21,20 @@ int comparePasswords(unsigned char *input, unsigned long passwordHash)
 
 const char *passList[10] = {"password", "stuff", "door", "lamp", "secure", "12345", "mpi", "onomatopoeia", "thicc", "phone"};
 
-
 int main(int argc, char *argv[])
 {
 	const int MAX_PASS_LEN = 10;
-	int rank, size, len, elementsPerProcess;
-	char name[MPI_MAX_PROCESSOR_NAME];
+	int rank, size, elementsPerProcess;
 	
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
-	MPI_Get_processor_name(name, &len);
 	
 	elementsPerProcess = (sizeof(passList) / sizeof(passList[0])) / size;
 	char **subList;
 	int i;
 	
 	subList = malloc(elementsPerProcess * sizeof(char*));
-	printf("the elementsPerProcess is %d and %d is the size", elementsPerProcess, size);
 	for (i = 0; i < elementsPerProcess; i++)
 	{
 		subList[i] = malloc((MAX_PASS_LEN + 1) * sizeof(char));
@@ -48,10 +44,9 @@ int main(int argc, char *argv[])
 	
 	for(i = 0; i < elementsPerProcess; i++)
 	{
-		printf("I am node %d getting %s\n", rank, *subList[i]);
+		printf("I am node %d getting %s\n", rank, subList[i]);
 	} // TEST FOR LOOP
 	
-	printf ("Hello world! I'm %d of %d on %s\n", rank, size, name);
 	MPI_Finalize();
 	exit(0);
 }
