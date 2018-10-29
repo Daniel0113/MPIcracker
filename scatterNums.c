@@ -33,22 +33,22 @@ int main(int argc, char *argv[])
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 	MPI_Get_processor_name(name, &len);
 	
-	elementsPerProcess = (sizeof(passList) / sizeof(passList[0])) / size;
-	char **subList;
+	elementsPerProcess = size / (sizeof(passList) / sizeof(passList[0]));
+	int **subList;
 	int i;
 	
-	subList = malloc(elementsPerProcess * sizeof(char*));
-	printf("the elementsPerProcess is %d and %d is the size", elementsPerProcess, size);
+	int *sub_rand_nums = (int *)malloc(sizeof(int) * elementsPerProcess);
 	for (i = 0; i < elementsPerProcess; i++)
 	{
-		subList[i] = malloc((MAX_PASS_LEN + 1) * sizeof(char));
+		subList[i] = malloc((MAX_PASS_LEN + 1) * sizeof(int));
 	}
 	
-	MPI_Scatter(passList, elementsPerProcess, MPI_CHAR, subList, elementsPerProcess, MPI_CHAR, 0, MPI_COMM_WORLD);
-	
+	MPI_Scatter(passList, elementsPerProcess, MPI_INT, subList, elementsPerProcess, MPI_INT, 0, MPI_COMM_WORLD);
+	printf("the elementsPerProcess is %d", elementsPerProcess);
 	for(i = 0; i < elementsPerProcess; i++)
 	{
-		printf("I am node %d getting %s\n", rank, *subList[i]);
+		printf("garbo\n");
+		printf("I am node %d getting %d\n", rank, *subList[i]);
 	} // TEST FOR LOOP
 	
 	printf ("Hello world! I'm %d of %d on %s\n", rank, size, name);
