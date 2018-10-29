@@ -19,7 +19,7 @@ int comparePasswords(unsigned char *input, unsigned long passwordHash)
   return (hash(input) == passwordHash);
 }
 
-const char *passList[10] = {"password", "stuff", "door", "lamp", "secure", "12345", "mpi", "onomatopoeia", "thicc", "phone"};
+const int numList[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
 
 int main(int argc, char *argv[])
@@ -33,25 +33,19 @@ int main(int argc, char *argv[])
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 	MPI_Get_processor_name(name, &len);
 	
-	elementsPerProcess = size / (sizeof(passList) / sizeof(passList[0]));
-	int **subList;
+	elementsPerProcess = (sizeof(numList) / sizeof(numList[0])) / size;
 	int i;
 	
 	int *sub_rand_nums = (int *)malloc(sizeof(int) * elementsPerProcess);
-	for (i = 0; i < elementsPerProcess; i++)
-	{
-		subList[i] = malloc((MAX_PASS_LEN + 1) * sizeof(int));
-	}
 	
-	MPI_Scatter(passList, elementsPerProcess, MPI_INT, subList, elementsPerProcess, MPI_INT, 0, MPI_COMM_WORLD);
-	printf("the elementsPerProcess is %d", elementsPerProcess);
+	MPI_Scatter(&numList, elementsPerProcess, MPI_INT, sub_rand_nums, elementsPerProcess, MPI_INT, 0, MPI_COMM_WORLD);
 	for(i = 0; i < elementsPerProcess; i++)
 	{
-		printf("garbo\n");
-		printf("I am node %d getting %d\n", rank, *subList[i]);
+		printf("the elementsPerProcess is %d\n", elementsPerProcess);
+		printf("I am node %d getting %d\n", rank, sub_rand_nums[i]);
 	} // TEST FOR LOOP
 	
-	printf ("Hello world! I'm %d of %d on %s\n", rank, size, name);
+	//printf ("Hello world! I'm %d of %d on %s\n", rank, size, name);
 	MPI_Finalize();
 	exit(0);
 }
