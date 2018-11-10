@@ -8,8 +8,9 @@ unsigned long hash(unsigned char *str) {
     unsigned long hash = 5381;
     int c;
 
-    while (c = *str++)
+    while ((c = *str++)) {
         hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+    }
 
     return hash;
 } // http://www.cse.yorku.ca/~oz/hash.html
@@ -50,9 +51,8 @@ void init_system(int argc, char *argv[]) {
 
     FILE *inp;
     //read file and get array size
-    //hashToFind = strtoul(argv[2], NULL, 0);
-    hashToFind = 1111;
-    inp = fopen("bruteForce.txt", "r"); // argv[1]
+    hashToFind = strtoul(argv[2], NULL, 0);
+    inp = fopen(argv[1], "r");
     int i = 0;
     MAX_PASS_LEN = 0;
     while (1) {
@@ -73,7 +73,7 @@ void init_system(int argc, char *argv[]) {
     arraysize = i;
     if (arraysize % size != 0) {
         printf("File must be divisible by nodes\n");
-        MPI_Abort(MPI_COMM_WORLD, 69);
+        MPI_Abort(MPI_COMM_WORLD, 2);
     }
     elementsPerProcess = arraysize / size;
 
@@ -85,7 +85,7 @@ void init_system(int argc, char *argv[]) {
         }
         i = 0;
         // read file and save to array
-        inp = fopen("bruteForce.txt", "r"); // argv[1]
+        inp = fopen(argv[1], "r");
         while (1) {
             char r = (char) fgetc(inp);
             int k = 0;
@@ -117,11 +117,9 @@ void root_task() {
     }
 
     for (i = 0; i < elementsPerProcess; i++) {
-        if (strncmp(passList[i], "hys", 3) == 0) {
-            printf("I am node %d getting %s\n", rank, passList[i]);
+        if(comparePasswords(passList[i], hashToFind)){
+            printf("I am node %d. I have %s\n", rank, passList[i]);
         }
-        //printf("I am node %d getting %s\n", rank, passList[i]);
-        //comparePasswords(subList[i], hashToFind);
     }
 }
 
@@ -130,10 +128,8 @@ void worker_task() {
         MPI_Recv(subList[i], MAX_PASS_LEN, MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status);
     }
     for (i = 0; i < elementsPerProcess; i++) {
-        if (strncmp(subList[i], "hys", 3) == 0) {
-            printf("I am node %d getting %s\n", rank, subList[i]);
+        if(comparePasswords(subList[i], hashToFind)){
+            printf("I am node %d. I have %s\n", rank, subList[i]);
         }
-        //printf("I am node %d getting %s\n", rank, subList[i]);
-        //comparePasswords(subList[i], hashToFind);
     }
 }
