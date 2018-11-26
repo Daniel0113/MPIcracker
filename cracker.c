@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
 
     init_system(argc, argv);
 
-    if (rank == 0) {
+    if (rank == MASTER) {
         root_task();
     } else {
         worker_task();
@@ -72,10 +72,6 @@ void init_system(int argc, char *argv[]) {
     fclose(input);
 
     arraySize = i;
-/*    if (arraySize % size != 0) {
-        printf("File must be divisible by nodes\n");
-        MPI_Abort(MPI_COMM_WORLD, 2);
-    }*/
     elementsPerProcess = arraySize / size;
     if (rank == size-1){ // Last node
         elementsPerProcess += arraySize % size;
@@ -124,7 +120,7 @@ void root_task() {
 
     for (i = 0; i < elementsPerProcess; i++) {
         if(comparePasswords((unsigned char*) passList[i], hashToFind)){
-            printf("I am node %d. I have %s\n", rank, passList[i]);
+            printf("The password is %s\n", passList[i]);
         }
     }
 }
@@ -135,7 +131,7 @@ void worker_task() {
     }
     for (i = 0; i < elementsPerProcess; i++) {
         if(comparePasswords((unsigned char*) subList[i], hashToFind)){
-            printf("I am node %d. I have %s\n", rank, subList[i]);
+            printf("The password is %s\n", subList[i]);
         }
     }
 }
