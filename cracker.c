@@ -35,7 +35,10 @@ void root_task();
 void worker_task();
 
 int main(int argc, char *argv[]) {
-
+	if (argc < 3) {
+		printf("Usage: mpirun cracker <wordlist> <hash>\n");
+		exit(1);
+	}
 	init_system(argc, argv);
 
 	if (rank == MASTER) {
