@@ -35,7 +35,7 @@ void root_task();
 void worker_task();
 
 int main(int argc, char *argv[]) {
-	if (argc < 3) {
+	if (argc != 3) {
 		printf("Usage: mpirun cracker <wordlist> <hash>\n");
 		exit(1);
 	}
@@ -45,6 +45,11 @@ int main(int argc, char *argv[]) {
 		root_task();
 	} else {
 		worker_task();
+	}
+	MPI_Barrier(MPI_COMM_WORLD);
+	if(rank == MASTER) {
+		if(exitCode != 1)
+			printf("Password was not found.\n");
 	}
 	MPI_Finalize();
 	exit(0);
@@ -133,14 +138,13 @@ void root_task() {
 	for (i = 0; i < elementsPerProcess; i++) {
 		MPI_Test(&request, &flag, &status2);
 		if (flag != 0) {
-			//printf("Node %d: Received EXIT\n", rank);
 			break;
 		}
 		if (comparePasswords((unsigned char*) passList[i], hashToFind)) {
 			printf("The password is %s\n", passList[i]);
 			MPI_Cancel(&request);
+			exitCode = 1;
 			for (i = 1; i < size; i++) {
-				//printf("Sending exit to %d\n", i);
 				MPI_Send(&sendExit, 1, MPI_INT, i, 1, MPI_COMM_WORLD);
 			}
 			break;
@@ -158,7 +162,6 @@ void worker_task() {
 	for (i = 0; i < elementsPerProcess; i++) {
 		MPI_Test(&request, &flag, &status2);
 		if (flag != 0) {
-			//printf("Node %d: Received EXIT\n", rank);
 			break;
 		}
 		if (comparePasswords((unsigned char*) subList[i], hashToFind)) {
@@ -166,7 +169,6 @@ void worker_task() {
 			MPI_Cancel(&request);
 			for (i = 0; i < size; i++) {
 				if (i != rank) {
-					//printf("Sending exit to %d\n", i);
 					MPI_Send(&sendExit, 1, MPI_INT, i, 1, MPI_COMM_WORLD);
 				}
 			}
