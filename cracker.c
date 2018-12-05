@@ -51,6 +51,7 @@ int main(int argc, char *argv[]) {
 		if(exitCode != 1)
 			printf("Password was not found.\n");
 	}
+	MPI_Cancel(&request);
 	MPI_Finalize();
 	exit(0);
 }
